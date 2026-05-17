@@ -9,6 +9,7 @@ from uiElements import UIElement
 from butterfly import Butterfly
 from JoystickInterface import JoystickInterface
 from minionSpoon import MinionSpoon
+
 class ScrollingMap:
     def __init__(self):
         width = 400
@@ -54,7 +55,7 @@ class ScrollingMap:
         self.player = Player((myX,myY), self.screen.get_size(), (mySpeedX, mySpeedY))
         self.movingSprites.add(self.player)
         self.allSprites.add(self.player)
-        self.spoon = Spoon((130,50), self.screen.get_size(), (5, 5))
+        self.spoon = Spoon((self.screen.get_size()[0] *0.325,self.screen.get_size()[1]*0.1), self.screen.get_size(), (5, 5))
         self.allSprites.add(self.spoon)
         self.enemies.add(self.spoon)
     
@@ -64,9 +65,9 @@ class ScrollingMap:
       difficultyLevel = self.spoon.difficultyLevel
       #location,size,color,text,textSize,textColor
       uiLocH = (0,0)
-      uiSize = (400,50)
+      uiSize = (self.screen.get_width(),50)
       uiColor = "black"
-      uiText = f"Score: {score} | Rarest Butterfly: {rarestButterfly} | Difficulty Level: {difficultyLevel}"
+      uiText = f"Score: {score} | Rarest Butterfly: {rarestButterfly} | Level: {difficultyLevel}"
       uiTextSize = 14
       uiTextColor = "white"
       self.scoreUI = UIElement(uiLocH, uiSize, uiColor, uiText, uiTextSize, uiTextColor)
@@ -137,7 +138,7 @@ class ScrollingMap:
           if gameTimer % 345 == 0:
             colors = ["brown", "yellow","orange","royalBlue","purple","bloodRed","gold"]
             butterflyColor = random.choices(colors, cum_weights=[75,83,90,96,99,99.9,100])
-            centerY = random.randint(65,280)
+            centerY = random.randint(self.screen.get_size()[1] *0.13,self.screen.get_size()[1]*0.56)
             self.butterfly = Butterfly(0,centerY,*butterflyColor)
             self.collectibles.add(self.butterfly)
             self.allSprites.add(self.butterfly)
@@ -145,14 +146,29 @@ class ScrollingMap:
           if gameTimer % 210 == 0:
             colors = ["brown", "yellow","orange","royalBlue","purple","bloodRed","gold"]
             butterflyColor = random.choices(colors, cum_weights=[35,70,85,94,98,99.6,100])
-            centerY = random.randint(65,280)
+            centerY = random.randint(self.screen.get_size()[1] *0.13,self.screen.get_size()[1]*0.56)
             self.butterfly = Butterfly(0,centerY,*butterflyColor)
             self.collectibles.add(self.butterfly)
             self.allSprites.add(self.butterfly)
 
-#    def createMinions(self):
-      
-            
+    def createMinions(self, difficultyLevel, gameTimer):
+      if difficultyLevel == "HARD":
+        if gameTimer % 45 == 0:
+          width = self.screen.get_size()[0]
+          height = self.screen.get_size()[1]
+          side = random.choice(["left","right"])
+          if side == "left":
+            startX = random.randint(-50,0)
+            startY = random.randint(-50,int(height*0.3))
+            speed = (random.randint(5,10), random.randint(5,10))
+          if side == "right":
+            startX = random.randint(width,width+50)
+            startY = random.randint(-50,int(height*0.3))
+            speed = (random.randint(-10,-5), random.randint(5,10))
+          minion = MinionSpoon((startX,startY), (width, height), speed)
+          self.enemies.add(minion)
+          self.allSprites.add(minion)
+          
     def update(self):
         self.clock.tick(self.targetFrames)
         difficultyLevel = self.spoon.difficultyLevel
@@ -160,8 +176,9 @@ class ScrollingMap:
 
         if(not self.gameOver):
           self.createCollectibles(difficultyLevel,self.gameTimer)
+          self.createMinions(difficultyLevel,self.gameTimer)
           self.collectibles.update()
-          self.spoon.update(self.player.rect.center)
+          self.enemies.update(self.player.rect.center)
           self.scoreUI.changeText(f"Score: {self.spoon.score} | Rarest Butterfly: {self.player.rarestButterfly} | Difficulty Level: {self.spoon.difficultyLevel}")
           self.scoreUI.update()
           self.gameOver = self.player.update(self.directions, self.buttons, self.enemies, self.collectibles)
@@ -176,7 +193,9 @@ class ScrollingMap:
             self.screen.blit(self.background, (curX, curY))
 
     def drawThankYouScreen(self):
-      colorSurface = pygame.Surface((400,500))
+      colorSurface = pygame.Surface(self.screen.get_size())
+      midX = self.screen.get_size()[0]//2
+      screenY = self.screen.get_size()[1]
       colorSurface.fill((255,255,255))
       for butterfly in self.player.collectedButterfliesList:
         if butterfly == "brown":
@@ -199,12 +218,12 @@ class ScrollingMap:
       textSurface4 = myFont.render(f"Rarest Butterfly: {self.player.rarestButterfly}", True, (0,0,0))
       textSurface5 = myFont.render("Click 'y' to play again.", True, (0,0,0))
       textSurface6 = myFont.render("Click 'n' to exit.", True, (0,0,0))
-      textRect1 = textSurface1.get_rect(center=(200,100))
-      textRect2 = textSurface2.get_rect(center=(200,150))
-      textRect3 = textSurface3.get_rect(center=(200,200))
-      textRect4 = textSurface4.get_rect(center=(200,250))
-      textRect5 = textSurface5.get_rect(center=(200,300))
-      textRect6 = textSurface6.get_rect(center=(200,350))
+      textRect1 = textSurface1.get_rect(center=(midX, screenY*0.2))
+      textRect2 = textSurface2.get_rect(center=(midX, screenY*0.3))
+      textRect3 = textSurface3.get_rect(center=(midX, screenY*0.4))
+      textRect4 = textSurface4.get_rect(center=(midX, screenY*0.5))
+      textRect5 = textSurface5.get_rect(center=(midX, screenY*0.6))
+      textRect6 = textSurface6.get_rect(center=(midX, screenY*0.7))
       self.screen.blit(colorSurface, (0,0))
       self.screen.blit(textSurface1, textRect1)
       self.screen.blit(textSurface2,textRect2)
@@ -214,7 +233,9 @@ class ScrollingMap:
       self.screen.blit(textSurface6,textRect6)
 
     def drawStartScreen(self):
-      colorSurface = pygame.Surface((400,500))
+      colorSurface = pygame.Surface(self.screen.get_size())
+      midX = self.screen.get_size()[0]//2
+      screenY = self.screen.get_size()[1]
       colorSurface.fill((255,255,255))
       myFont = pygame.font.SysFont("Arial", 32)
       textSurface = myFont.render("WELCOME TO SPOON SURVIVAL", True, (0,0,0))
@@ -224,13 +245,13 @@ class ScrollingMap:
       textSurface5 = myFont.render("The spoon will chase you", True, (0,0,0))
       textSurface6 = myFont.render("As you go on, the game will get more difficult.", True, (0,0,0))
       textSurface7 = myFont.render("Click y or button 1 to start playing", True, (0,0,0))
-      textRect = textSurface.get_rect(center=(200,100))
-      textRect2 = textSurface2.get_rect(center=(200,150))
-      textRect3 = textSurface3.get_rect(center=(200,200))
-      textRect4 = textSurface4.get_rect(center=(200,250))
-      textRect5 = textSurface5.get_rect(center=(200,300))
-      textRect6 = textSurface6.get_rect(center=(200,350))
-      textRect7 = textSurface7.get_rect(center=(200,400))
+      textRect = textSurface.get_rect(center=(midX, screenY*0.2))
+      textRect2 = textSurface2.get_rect(center=(midX, screenY*0.3))
+      textRect3 = textSurface3.get_rect(center=(midX, screenY*0.4))
+      textRect4 = textSurface4.get_rect(center=(midX, screenY*0.5))
+      textRect5 = textSurface5.get_rect(center=(midX, screenY*0.6))
+      textRect6 = textSurface6.get_rect(center=(midX, screenY*0.7))
+      textRect7 = textSurface7.get_rect(center=(midX, screenY*0.8))
       self.screen.blit(colorSurface, (0,0))
       self.screen.blit(textSurface, textRect)
       self.screen.blit(textSurface2,textRect2)

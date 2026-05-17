@@ -1,12 +1,14 @@
-Game Title: MY GAME
-Author: MY NAME
-Keyword: MY ASSIGNED WORD
+Game Title: Spoon Survival
+Author: Taksh Nahata
+Keyword: Spoon
 
 Controls:
-- ARCADE CONTROL --> KEY: ACTION
+- UP Joystick --> KEY: Move Up
+- DOWN Joystick --> KEY: Move Down
+- RIGHT Joystick --> KEY: Move Right
+- LEFT Joystick --> KEY: Move Left
 
-Objective:
-HERE
+Objective: Dodge the spoon for as long as possible. Eat butterflies to boost your score
 
 Preview Notes:
 Shows gameplay loop and win condition.
