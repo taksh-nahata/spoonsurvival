@@ -19,6 +19,7 @@ class ScrollingMap:
         self.gameTimer = 0
         self.setup(width, height)   
         self.additionalScore = 0
+        self.gameStart = False
     #1
     def loadBackground(self):
         #1
@@ -48,14 +49,15 @@ class ScrollingMap:
 
 
     def setupPlayerAndObstacles(self):
+        width, height = self.screen.get_size()
         myX = self.screen.get_size()[0]/2
         myY = self.screen.get_size()[1]/2
-        mySpeedX = 10
-        mySpeedY = 10
+        mySpeedX = width*0.025
+        mySpeedY = height *0.02
         self.player = Player((myX,myY), self.screen.get_size(), (mySpeedX, mySpeedY))
         self.movingSprites.add(self.player)
         self.allSprites.add(self.player)
-        self.spoon = Spoon((self.screen.get_size()[0] *0.325,self.screen.get_size()[1]*0.1), self.screen.get_size(), (5, 5))
+        self.spoon = Spoon((self.screen.get_size()[0] *0.325,self.screen.get_size()[1]*0.1), self.screen.get_size(), (width*0.0125, height*0.01))
         self.allSprites.add(self.spoon)
         self.enemies.add(self.spoon)
     
@@ -68,7 +70,7 @@ class ScrollingMap:
       uiSize = (self.screen.get_width(),50)
       uiColor = "black"
       uiText = f"Score: {score} | Rarest Butterfly: {rarestButterfly} | Level: {difficultyLevel}"
-      uiTextSize = 14
+      uiTextSize = int(self.screen.get_width() *0.025)
       uiTextColor = "white"
       self.scoreUI = UIElement(uiLocH, uiSize, uiColor, uiText, uiTextSize, uiTextColor)
       self.scoreUI.rect.x=0
@@ -117,7 +119,7 @@ class ScrollingMap:
         joystick_count = pygame.joystick.get_count()
         if joystick_count != 0:
           self.buttons = self.myJoysticks[0].getButtonsPressed()
-          self.directions = self.myJoysticks[0].getJoystickDirections()
+          self.directions = self.myJoysticks[0].getJoystickDirection()
           if 9 in self.buttons:
             self.running = False
 
@@ -138,22 +140,30 @@ class ScrollingMap:
           if gameTimer % 345 == 0:
             colors = ["brown", "yellow","orange","royalBlue","purple","bloodRed","gold"]
             butterflyColor = random.choices(colors, cum_weights=[75,83,90,96,99,99.9,100])
-            centerY = random.randint(self.screen.get_size()[1] *0.13,self.screen.get_size()[1]*0.56)
-            self.butterfly = Butterfly(0,centerY,*butterflyColor)
+            centerY = random.randint(int(self.screen.get_size()[1] *0.13),int(self.screen.get_size()[1]*0.56))
+            self.butterfly = Butterfly(0,centerY,*butterflyColor, self.screen.get_size())
             self.collectibles.add(self.butterfly)
             self.allSprites.add(self.butterfly)
         if difficultyLevel == "MEDIUM":
           if gameTimer % 210 == 0:
             colors = ["brown", "yellow","orange","royalBlue","purple","bloodRed","gold"]
             butterflyColor = random.choices(colors, cum_weights=[35,70,85,94,98,99.6,100])
-            centerY = random.randint(self.screen.get_size()[1] *0.13,self.screen.get_size()[1]*0.56)
-            self.butterfly = Butterfly(0,centerY,*butterflyColor)
+            centerY = random.randint(int(self.screen.get_size()[1] *0.13),int(self.screen.get_size()[1]*0.56))
+            self.butterfly = Butterfly(0,centerY,*butterflyColor, self.screen.get_size())
+            self.collectibles.add(self.butterfly)
+            self.allSprites.add(self.butterfly)
+        if difficultyLevel == "HARD":
+          if gameTimer % 150 == 0:
+            colors = ["brown", "yellow","orange","royalBlue","purple","bloodRed","gold"]
+            butterflyColor = random.choices(colors, cum_weights=[20,45,65,80,90,96,100])
+            centerY = random.randint(int(self.screen.get_size()[1] *0.13),int(self.screen.get_size()[1]*0.56))
+            self.butterfly = Butterfly(0,centerY,*butterflyColor, self.screen.get_size())
             self.collectibles.add(self.butterfly)
             self.allSprites.add(self.butterfly)
 
     def createMinions(self, difficultyLevel, gameTimer):
       if difficultyLevel == "HARD":
-        if gameTimer % 45 == 0:
+        if gameTimer % 90 == 0:
           width = self.screen.get_size()[0]
           height = self.screen.get_size()[1]
           side = random.choice(["left","right"])
@@ -179,7 +189,7 @@ class ScrollingMap:
           self.createMinions(difficultyLevel,self.gameTimer)
           self.collectibles.update()
           self.enemies.update(self.player.rect.center)
-          self.scoreUI.changeText(f"Score: {self.spoon.score} | Rarest Butterfly: {self.player.rarestButterfly} | Difficulty Level: {self.spoon.difficultyLevel}")
+          self.scoreUI.changeText(f"Score: {self.spoon.score} | Rarest Butterfly: {self.player.rarestButterfly} | Level: {self.spoon.difficultyLevel} | Indestructible: {self.player.indestructible}")
           self.scoreUI.update()
           self.gameOver = self.player.update(self.directions, self.buttons, self.enemies, self.collectibles)
           self.scrollAtEdge()
@@ -237,14 +247,15 @@ class ScrollingMap:
       midX = self.screen.get_size()[0]//2
       screenY = self.screen.get_size()[1]
       colorSurface.fill((255,255,255))
-      myFont = pygame.font.SysFont("Arial", 32)
+      myFont = pygame.font.SysFont("Arial", 16)
       textSurface = myFont.render("WELCOME TO SPOON SURVIVAL", True, (0,0,0))
-      textSurface2 = myFont.render("Game Instructions", True, (0,0,0))
+      textSurface2 = myFont.render("Game Instructions:", True, (0,0,0))
       textSurface3 = myFont.render("Use the Joystick or WASD to move around", True, (0,0,0))
-      textSurface4 = myFont.render("Goal: Dodge the spoon for as long as possible", True, (0,0,0))
-      textSurface5 = myFont.render("The spoon will chase you", True, (0,0,0))
-      textSurface6 = myFont.render("As you go on, the game will get more difficult.", True, (0,0,0))
-      textSurface7 = myFont.render("Click y or button 1 to start playing", True, (0,0,0))
+      textSurface4 = myFont.render("Use 'h' to become invincible for 3 seconds", True, (0,0,0))
+      textSurface5 = myFont.render("Goal: Dodge the spoon for as long as possible", True, (0,0,0))
+      textSurface6 = myFont.render("The spoon will chase you", True, (0,0,0))
+      textSurface7 = myFont.render("As you go on, the game will get more difficult.", True, (0,0,0))
+      textSurface8 = myFont.render("Click y or button 1 to start playing", True, (0,0,0))
       textRect = textSurface.get_rect(center=(midX, screenY*0.2))
       textRect2 = textSurface2.get_rect(center=(midX, screenY*0.3))
       textRect3 = textSurface3.get_rect(center=(midX, screenY*0.4))
@@ -252,6 +263,7 @@ class ScrollingMap:
       textRect5 = textSurface5.get_rect(center=(midX, screenY*0.6))
       textRect6 = textSurface6.get_rect(center=(midX, screenY*0.7))
       textRect7 = textSurface7.get_rect(center=(midX, screenY*0.8))
+      textRect8 = textSurface8.get_rect(center=(midX, screenY*0.9))
       self.screen.blit(colorSurface, (0,0))
       self.screen.blit(textSurface, textRect)
       self.screen.blit(textSurface2,textRect2)
@@ -260,9 +272,26 @@ class ScrollingMap:
       self.screen.blit(textSurface5, textRect5)
       self.screen.blit(textSurface6,textRect6)
       self.screen.blit(textSurface7,textRect7)
+      self.screen.blit(textSurface8,textRect8)
+    def reset(self):
+      self.gameOver = False
+      self.gameTimer = 0
+      self.additionalScore = 0
+      self.scroll = 0
+      self.allSprites.empty()
+      self.movingSprites.empty()
+      self.collectibles.empty()
+      self.enemies.empty()
+      self.setupPlayerAndObstacles()
+      self.setupUI()
 
   
     def draw(self):
+      self.drawStartScreen()
+      keystate = pygame.key.get_pressed()
+      if keystate[pygame.K_y]:
+        self.gameStart = True
+      if self.gameStart:
         if not self.gameOver:
           self.drawBackgroundScrolling()
           self.allSprites.draw(self.screen)
@@ -271,13 +300,11 @@ class ScrollingMap:
           self.drawThankYouScreen()
           keystate = pygame.key.get_pressed()
           if keystate[pygame.K_y]:
-            self.gameOver = False
-            self.running  =  True
-            main()
+            self.reset()
           if keystate[pygame.K_n]:
             self.running = False
         
-        pygame.display.flip()
+      pygame.display.flip()
         
     def shutdown(self):
         pygame.quit()

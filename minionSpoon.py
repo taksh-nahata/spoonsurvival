@@ -9,7 +9,8 @@ class MinionSpoon(pygame.sprite.Sprite):
       pygame.sprite.Sprite.__init__(self)
       self.originalImage = pygame.image.load(os.path.join(imageDir, "spoon.png")).convert()
       self.originalImage.set_colorkey(pygame.Color("black"))
-      self.originalImage = pygame.transform.scale_by(self.originalImage, 0.3)
+      width = self.originalImage.get_width()
+      self.originalImage = pygame.transform.scale_by(self.originalImage, ((screenSize[0]*0.11)/width))
       self.image = self.originalImage
       self.rect = self.image.get_rect(center=location)
       self.mask = pygame.mask.from_surface(self.image)
