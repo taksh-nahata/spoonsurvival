@@ -11,4 +11,4 @@ Controls:
 Objective: Dodge the spoon for as long as possible. Eat butterflies to boost your score
 
 Preview Notes:
-Shows gameplay loop and win condition.
+Spoon will come out and try to attack you as the dragonfly. Your goal is to keep dodging it as long as possible. If you survive its first attack it will come again and again in a loop, getting more and more difficult the longer you survive. You can't win the game but just trying to survive longer and scoring higher than last time is your goal.
